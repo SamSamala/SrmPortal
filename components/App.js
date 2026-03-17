@@ -4,8 +4,8 @@ import Dashboard from './Dashboard';
 import { getDayOrder } from './Dashboard';
 
 export default function App() {
-  const [dark,        setDark]        = useState(false);
-  const [view,        setView]        = useState('loading'); // starts as loading
+  const [dark, setDark] = useState(false);
+  const [view,        setView]        = useState('loading');
   const [email,       setEmail]       = useState('');
   const [pass,        setPass]        = useState('');
   const [loading,     setLoading]     = useState(false);
@@ -18,6 +18,7 @@ export default function App() {
   const [showPass,    setShowPass]    = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
 
+  // On mount: check for saved session
   useEffect(() => {
     const token      = localStorage.getItem('srm_session_token');
     const savedEmail = localStorage.getItem('srm_session_email');
@@ -27,17 +28,16 @@ export default function App() {
       setEmail(savedEmail);
       autoLogin(savedEmail, token);
     } else {
-      // ✅ No token → go to landing immediately, don't stay on 'loading'
       setView('landing');
     }
   }, []);
 
+  // Auto-login with saved session token
   async function autoLogin(emailArg, token) {
     try {
-      setLoading(true); // shows the LoginProgress spinner
+      setLoading(true);
 
       const controller = new AbortController();
-      // ✅ 270s — just under Railway's 300s limit
       const timeout = setTimeout(() => controller.abort(), 270000);
 
       const res = await fetch('/api/login', {
@@ -54,30 +54,30 @@ export default function App() {
         setData(json.data);
         setView('dashboard');
       } else if (res.status === 401 || json.error === 'session_expired') {
-        // ✅ Session expired — clear token, go to login (not logout which nukes everything)
         localStorage.removeItem('srm_session_token');
         localStorage.removeItem('srm_session_email');
         setSavedToken('');
         setView('login');
       } else {
-        // Any other failure — just go to landing, keep token intact for retry
         setView('landing');
       }
     } catch (e) {
-      // Network error / abort — don't clear session, just go to landing
       setView('landing');
     } finally {
       setLoading(false);
     }
   }
 
+  // Manual login
   async function handleLogin(e) {
     e?.preventDefault();
     if (!email || !pass) { setError('Enter email and password.'); return; }
-    setError(''); setLoading(true);
+    setError('');
+    setLoading(true);
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 270000);
+
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,8 +85,10 @@ export default function App() {
         signal: controller.signal,
       });
       clearTimeout(timeout);
+
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Login failed');
+
       if (json.needsCaptcha) {
         setCapImg(json.captchaImage);
         setSessId(json.sessionId);
@@ -97,7 +99,6 @@ export default function App() {
           localStorage.setItem('srm_session_email', email);
           setSavedToken(json.sessionToken);
         }
-        // ✅ Set data BEFORE view so dashboard renders with data immediately
         setData(json.data);
         setView('dashboard');
       }
@@ -105,14 +106,16 @@ export default function App() {
       if (err.name === 'AbortError') setError('Request timed out. SRM portal may be down. Please try again.');
       else setError(err.message);
     } finally {
-      setLoading(false); // ✅ always clears
+      setLoading(false);
     }
   }
 
+  // CAPTCHA solve
   async function handleCaptcha(e) {
     e?.preventDefault();
     if (!capSol) { setError('Enter CAPTCHA text.'); return; }
-    setError(''); setLoading(true);
+    setError('');
+    setLoading(true);
     try {
       const res = await fetch('/api/captcha', {
         method: 'POST',
@@ -121,6 +124,7 @@ export default function App() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'CAPTCHA failed');
+
       if (json.needsCaptcha) {
         setCapImg(json.captchaImage);
         setCapSol('');
@@ -141,6 +145,7 @@ export default function App() {
     }
   }
 
+  // Logout
   async function logout() {
     localStorage.removeItem('srm_session_token');
     localStorage.removeItem('srm_session_email');
@@ -159,17 +164,55 @@ export default function App() {
   }
 
   const shared = {
-    dark, setDark, view, setView, data, setData,
-    email, setEmail, pass, setPass,
-    loading, setLoading, error, setError,
-    capImg, setCapImg, capSol, setCapSol, sessId, setSessId,
-    savedToken, setSavedToken, showPass, setShowPass,
+    dark, setDark,
+    view, setView,
+    data, setData,
+    email, setEmail,
+    pass, setPass,
+    loading, setLoading,
+    error, setError,
+    capImg, setCapImg,
+    capSol, setCapSol,
+    sessId, setSessId,
+    savedToken, setSavedToken,
+    showPass, setShowPass,
     dataLoading, setDataLoading,
     handleLogin, handleCaptcha, logout,
   };
 
-  // ✅ 'loading' view only shows while useEffect is running (instant)
-  if (view === 'loading') return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'var(--bg)'}}>Checking session...</div>;
+  // Checking session (instant — only shows during useEffect)
+  if (view === 'loading') return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: dark ? '#04060d' : '#f5f0e8',
+      color: dark ? '#eef2ff' : '#1a1510',
+      fontFamily: 'Plus Jakarta Sans, sans-serif',
+      fontSize: 13,
+      gap: 10,
+    }}>
+      <div style={{
+        width: 16, height: 16, borderRadius: '50%',
+        border: '2px solid rgba(79,141,255,.3)',
+        borderTopColor: '#4f8dff',
+        animation: 'spin .7s linear infinite',
+      }}/>
+      Checking session...
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
 
+  // Landing page
+  if (view === 'landing') return (
+    <Landing
+      onLogin={() => setView('login')}
+      dark={dark}
+      setDark={setDark}
+    />
+  );
+
+  // Everything else (login, captcha, dashboard) handled inside Dashboard
   return <Dashboard {...shared} />;
 }
