@@ -7,10 +7,24 @@ export default async function handler(req, res) {
 
   const { email, password, sessionToken } = req.body || {};
 
-  try {
-    const useSession = !!(sessionToken && sessionToken === Buffer.from(email).toString('base64'));
+  if (!email) {
+    return res.status(400).json({ error: 'Email required' });
+  }
 
-    const result = await startLogin(email, password, useSession);
+  const expectedToken = Buffer.from(email).toString('base64');
+
+  // 🔥 AUTO LOGIN
+  if (sessionToken && sessionToken === expectedToken) {
+    try {
+      const result = await startLogin(email, null, true);
+      return res.status(200).json(result);
+    } catch (e) {
+      return res.status(401).json({ error: 'Session expired' });
+    }
+  }
+
+  try {
+    const result = await startLogin(email, password, false);
 
     if (!result.needsCaptcha) {
       const sessionId = Buffer.from(email).toString('base64');
