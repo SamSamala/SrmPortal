@@ -5,7 +5,7 @@ import { getDayOrder } from './Dashboard';
 
 export default function App() {
   const [dark,        setDark]        = useState(false);
-  const [view,        setView]        = useState('loading');
+  const [view,        setView]        = useState('loading'); // starts as loading
   const [email,       setEmail]       = useState('');
   const [pass,        setPass]        = useState('');
   const [loading,     setLoading]     = useState(false);
@@ -19,49 +19,93 @@ export default function App() {
   const [dataLoading, setDataLoading] = useState(false);
 
   useEffect(() => {
-  const token = localStorage.getItem('srm_session_token');
-  const savedEmail = localStorage.getItem('srm_session_email');
+    const token      = localStorage.getItem('srm_session_token');
+    const savedEmail = localStorage.getItem('srm_session_email');
 
-  if (token && savedEmail) {
-    setSavedToken(token);
-    setEmail(savedEmail);
+    if (token && savedEmail) {
+      setSavedToken(token);
+      setEmail(savedEmail);
+      autoLogin(savedEmail, token);
+    } else {
+      // ✅ No token → go to landing immediately, don't stay on 'loading'
+      setView('landing');
+    }
+  }, []);
 
-    autoLogin(savedEmail, token); // 👈 THIS LINE
+  async function autoLogin(emailArg, token) {
+    try {
+      setLoading(true); // shows the LoginProgress spinner
+
+      const controller = new AbortController();
+      // ✅ 270s — just under Railway's 300s limit
+      const timeout = setTimeout(() => controller.abort(), 270000);
+
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailArg, password: null, sessionToken: token }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      const json = await res.json();
+
+      if (res.ok && json.data && !json.needsCaptcha) {
+        setData(json.data);
+        setView('dashboard');
+      } else if (res.status === 401 || json.error === 'session_expired') {
+        // ✅ Session expired — clear token, go to login (not logout which nukes everything)
+        localStorage.removeItem('srm_session_token');
+        localStorage.removeItem('srm_session_email');
+        setSavedToken('');
+        setView('login');
+      } else {
+        // Any other failure — just go to landing, keep token intact for retry
+        setView('landing');
+      }
+    } catch (e) {
+      // Network error / abort — don't clear session, just go to landing
+      setView('landing');
+    } finally {
+      setLoading(false);
+    }
   }
-}, []);
+
   async function handleLogin(e) {
     e?.preventDefault();
     if (!email || !pass) { setError('Enter email and password.'); return; }
     setError(''); setLoading(true);
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 120000); // 2min timeout
+      const timeout = setTimeout(() => controller.abort(), 270000);
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: pass, sessionToken: savedToken }),
+        body: JSON.stringify({ email, password: pass }),
         signal: controller.signal,
       });
       clearTimeout(timeout);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Login failed');
-      setLoading(false);
       if (json.needsCaptcha) {
-        setCapImg(json.captchaImage); setSessId(json.sessionId); setView('captcha');
+        setCapImg(json.captchaImage);
+        setSessId(json.sessionId);
+        setView('captcha');
       } else {
-        if (json.sessionToken && typeof window !== 'undefined') {
+        if (json.sessionToken) {
           localStorage.setItem('srm_session_token', json.sessionToken);
           localStorage.setItem('srm_session_email', email);
+          setSavedToken(json.sessionToken);
         }
-        setView('dashboard');
-        setDataLoading(true);
+        // ✅ Set data BEFORE view so dashboard renders with data immediately
         setData(json.data);
-        setDataLoading(false);
+        setView('dashboard');
       }
     } catch (err) {
-      setLoading(false);
       if (err.name === 'AbortError') setError('Request timed out. SRM portal may be down. Please try again.');
       else setError(err.message);
+    } finally {
+      setLoading(false); // ✅ always clears
     }
   }
 
@@ -77,73 +121,42 @@ export default function App() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'CAPTCHA failed');
-      setLoading(false);
       if (json.needsCaptcha) {
-        setCapImg(json.captchaImage); setCapSol(''); setError('Wrong CAPTCHA. Try again.');
+        setCapImg(json.captchaImage);
+        setCapSol('');
+        setError('Wrong CAPTCHA. Try again.');
       } else {
-        if (json.sessionToken && typeof window !== 'undefined') {
+        if (json.sessionToken) {
           localStorage.setItem('srm_session_token', json.sessionToken);
           localStorage.setItem('srm_session_email', email);
+          setSavedToken(json.sessionToken);
         }
-        setView('dashboard');
-        setDataLoading(true);
         setData(json.data);
-        setDataLoading(false);
+        setView('dashboard');
       }
     } catch (err) {
-      setLoading(false);
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   }
 
   async function logout() {
-  if (typeof window !== 'undefined') {
     localStorage.removeItem('srm_session_token');
     localStorage.removeItem('srm_session_email');
+    setSavedToken('');
+    try {
+      await fetch('/api/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+    } catch (e) {}
+    setData(null);
+    setEmail('');
+    setPass('');
+    setView('landing');
   }
-  setSavedToken('');
-  try { await fetch('/api/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) }); } catch (e) {}
-  setView('landing'); setData(null); setEmail(''); setPass('');
-}
-
-
-// 👇 ADD THIS RIGHT HERE (same file, below logout)
-
-async function autoLogin(email, token) {
-  try {
-    setDataLoading(true);
-
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email,
-        password: 'AUTO_LOGIN',
-        sessionToken: token
-      })
-    });
-
-    const json = await res.json();
-
-    if (res.ok && !json.needsCaptcha && json.data) {
-  console.log("AutoLogin success:", json);
-
-  setData(json.data);
-  setView('dashboard');
-
-} else {
-  console.log("AutoLogin failed:", json);
-
-  // ❗ DO NOT logout (this was killing your session)
-  setView('landing');
-}
-
-  } catch (e) {
-    logout();
-  } finally {
-    setDataLoading(false);
-  }
-}
 
   const shared = {
     dark, setDark, view, setView, data, setData,
@@ -155,6 +168,8 @@ async function autoLogin(email, token) {
     handleLogin, handleCaptcha, logout,
   };
 
-  if (view === 'loading') {return <div style={{padding:20}}>Checking session...</div>;}
+  // ✅ 'loading' view only shows while useEffect is running (instant)
+  if (view === 'loading') return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'var(--bg)'}}>Checking session...</div>;
+
   return <Dashboard {...shared} />;
 }
