@@ -1,3 +1,4 @@
+console.log("🔥 API HIT");
 const { startLogin } = require('../../lib/scraper');
 
 export default async function handler(req, res) {
