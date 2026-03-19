@@ -62,8 +62,11 @@ export default function App() {
   }, []);
 
   // Background refresh (silent — keeps showing existing data while fetching)
+  // Data on screen only updates AFTER the full fetch completes (spinner stops first)
   async function backgroundRefresh(emailArg, token, forceRefresh) {
     setDataLoading(true);
+    let freshData = null;
+    let expired   = false;
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 270000);
@@ -77,6 +80,16 @@ export default function App() {
       const json = await res.json();
 
       if (res.status === 401 || json.error === 'session_expired') {
+        expired = true;
+      } else if (res.ok && json.data) {
+        freshData = json.data;
+      }
+    } catch(e) {
+      // Network/timeout error — keep existing data silently
+    } finally {
+      // Stop spinner first, then apply new data so UI doesn't flash mid-spin
+      setDataLoading(false);
+      if (expired) {
         localStorage.removeItem('srm_session_token');
         localStorage.removeItem('srm_session_email');
         localStorage.removeItem(LS_DATA_KEY);
@@ -84,14 +97,10 @@ export default function App() {
         setSavedToken('');
         setData(null);
         setView('login');
-      } else if (res.ok && json.data) {
-        setData(json.data);
-        saveDataCache(json.data);
+      } else if (freshData) {
+        setData(freshData);
+        saveDataCache(freshData);
       }
-      // On network/timeout error: keep showing existing data silently
-    } catch(e) {}
-    finally {
-      setDataLoading(false);
     }
   }
 
