@@ -579,21 +579,12 @@ export default function Dashboard({
   const [activeDay,setActiveDay]=useState('Day 1');
   const [loginStartTime,setLoginStartTime]=useState(null);
   const [plannerData,setPlannerData]=useState(null);
-  const [plannerLoading,setPlannerLoading]=useState(false);
 
   useEffect(()=>{const o=getDayOrder(new Date());if(o)setActiveDay('Day '+o);},[]);
 
-  // Fetch academic planner data once dashboard loads
   useEffect(()=>{
-    if(!data) return; // only fetch after login
-    setPlannerLoading(true);
-    // plannerData is fetched by the parent (passed via props)
-    // We'll call /api/planner to get it
-    fetch('/api/planner',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:data.student&&data.student.regNo?undefined:undefined})})
-      .then(r=>r.json())
-      .then(j=>{ if(j.data) setPlannerData(j.data); })
-      .catch(()=>{})
-      .finally(()=>setPlannerLoading(false));
+    if(!data) return;
+    if(data.plannerData) setPlannerData(data.plannerData);
   },[data]);
   useEffect(()=>{if(loading)setLoginStartTime(Date.now());},[loading]);
 
@@ -886,18 +877,14 @@ export default function Dashboard({
               {/* CALENDAR TAB */}
               {tab==='calendar'&&(
                 <>
-                  <div className="seclbl" style={{justifyContent:'space-between'}}>
+                  <div className="seclbl">
                     Academic Calendar
-                    {plannerLoading&&<span style={{fontSize:10,color:'var(--text3)',fontWeight:400,display:'flex',alignItems:'center',gap:5}}>
-                      <div style={{width:10,height:10,borderRadius:'50%',border:'1.5px solid var(--border)',borderTopColor:'var(--accent)',animation:'spin .7s linear infinite'}}/>
-                      Loading planner...
-                    </span>}
                   </div>
                   <div style={{maxWidth:440}}>
                     <Calendar dark={dark} onSelectDay={d=>{setActiveDay(d);goTab('timetable');}} plannerData={plannerData}/>
                   </div>
-                  {!plannerData&&!plannerLoading&&<p style={{marginTop:8,fontSize:11,color:'var(--text3)',padding:'8px 12px',background:'var(--surf2)',borderRadius:7,border:'1px solid var(--border)'}}>
-                    Calendar showing calculated day orders. Official planner data loading after first login.
+                  {!plannerData&&<p style={{marginTop:8,fontSize:11,color:'var(--text3)',padding:'8px 12px',background:'var(--surf2)',borderRadius:7,border:'1px solid var(--border)'}}>
+                    Calendar showing calculated day orders. Log in again to load official planner data.
                   </p>}
                   <p style={{marginTop:10,fontSize:11,color:'var(--text3)'}}>Tap any date to view that day's timetable.</p>
                 </>
