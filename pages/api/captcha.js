@@ -1,3 +1,4 @@
+// Captcha API — launches browser session and returns solved captcha image
 import { solveCaptcha } from '../../lib/scraper';
 export const config = { api: { bodyParser: true }, maxDuration: 60 };
 

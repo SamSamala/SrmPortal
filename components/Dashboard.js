@@ -1,3 +1,4 @@
+// Dashboard component — displays attendance, marks, timetable, and planner data
 import { useState, useEffect } from 'react';
 
 const MIN_PCT = 75;

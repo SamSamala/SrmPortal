@@ -1,3 +1,4 @@
+// Login API — authenticates user against SRM portal and stores session in Redis
 const { startLogin, trackUser } = require('../../lib/scraper');
 
 export const config = {

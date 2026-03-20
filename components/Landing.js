@@ -1,3 +1,4 @@
+// Landing component — login form with captcha flow and theme support
 import { useState, useEffect, useRef } from 'react';
 
 function getLandCSS(dark) {

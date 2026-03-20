@@ -1,3 +1,4 @@
+// Logout API — closes Playwright browser session and clears Redis session data
 const { logoutUser } = require('../../lib/scraper');
 
 export default function handler(req, res) {

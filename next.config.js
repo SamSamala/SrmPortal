@@ -1,3 +1,4 @@
+// Next.js configuration — excludes Playwright from client bundle
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config, { isServer }) => {

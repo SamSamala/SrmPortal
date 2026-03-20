@@ -1,3 +1,4 @@
+// Root app component — manages auth state and renders Landing or Dashboard
 import { useState, useEffect } from 'react';
 import Landing from './Landing';
 import Dashboard from './Dashboard';

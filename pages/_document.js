@@ -1,3 +1,4 @@
+// Next.js custom Document — sets HTML shell, lang, and viewport meta
 import { Html, Head, Main, NextScript } from 'next/document';
 
 export default function Document() {

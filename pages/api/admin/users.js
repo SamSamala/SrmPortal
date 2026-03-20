@@ -1,3 +1,4 @@
+// Admin API — returns list of unique user emails tracked in Redis
 const redis = require('../../../lib/redis');
 
 export default async function handler(req, res) {
