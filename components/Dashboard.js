@@ -146,37 +146,54 @@ input,button,select{font-family:inherit;}
 
 /* TOPBAR */
 .topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;
-  justify-content:space-between;padding:0 clamp(12px,3vw,28px);height:50px;
-  background:${d?'rgba(4,6,13,.88)':'rgba(245,240,232,.92)'};
+  justify-content:space-between;padding:0 clamp(14px,3vw,32px);height:54px;gap:10px;
+  background:${d?'rgba(4,6,13,.9)':'rgba(245,240,232,.94)'};
   backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
-.topbar-logo{display:flex;align-items:center;gap:8px;cursor:pointer;}
-.lmark{width:26px;height:26px;border-radius:6px;
+.topbar-logo{display:flex;align-items:center;gap:9px;cursor:default;flex-shrink:0;}
+.lmark{width:28px;height:28px;border-radius:7px;
   background:linear-gradient(135deg,var(--accent),var(--acc2));
   display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:800;color:#fff;font-family:'Playfair Display',serif;}
-.lname{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;letter-spacing:-.2px;}
-.topbar-right{display:flex;align-items:center;gap:6px;}
-.today-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;
-  font-family:'Varela Round',sans-serif;letter-spacing:.04em;}
+  font-size:12px;font-weight:800;color:#fff;font-family:'Playfair Display',serif;
+  box-shadow:0 2px 8px rgba(79,141,255,.35);}
+.lname{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;letter-spacing:-.3px;}
+.topbar-right{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.today-badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:7px;
+  font-family:'Varela Round',sans-serif;letter-spacing:.04em;white-space:nowrap;}
 .ibt{width:32px;height:32px;background:var(--surf2);border:1px solid var(--border);
-  border-radius:7px;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
   cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;}
 .ibt:hover{border-color:var(--bord2);color:var(--text);}
-.btn-sm{padding:5px 12px;background:transparent;border:1px solid var(--border);
-  border-radius:7px;color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s;}
-.btn-sm:hover{border-color:var(--accent);color:var(--accent);}
-.live-ind{display:flex;align-items:center;gap:4px;}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;
+.btn-signout{display:flex;align-items:center;gap:5px;padding:5px 12px;
+  background:transparent;border:1px solid var(--border);
+  border-radius:8px;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;
+  transition:all .15s;white-space:nowrap;}
+.btn-signout:hover{border-color:var(--red);color:var(--red);}
+.btn-signout-icon{width:32px;height:32px;background:transparent;border:1px solid var(--border);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text2);font-size:14px;transition:all .15s;display:none;}
+.btn-signout-icon:hover{border-color:var(--red);color:var(--red);}
+.live-ind{display:flex;align-items:center;gap:4px;padding:4px 8px;
+  background:var(--surf2);border:1px solid var(--border);border-radius:8px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;
   box-shadow:0 0 5px var(--green);}
 .live-lbl{font-size:10px;font-weight:700;color:var(--green);font-family:'Varela Round',sans-serif;letter-spacing:.03em;}
 .live-time{font-size:10px;color:var(--text3);font-family:'Varela Round',sans-serif;}
 .btn-refresh{display:flex;align-items:center;gap:5px;padding:5px 11px;
-  background:var(--surf2);border:1px solid var(--border);border-radius:7px;
+  background:var(--surf2);border:1px solid var(--border);border-radius:8px;
   color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;
   transition:all .15s;}
 .btn-refresh:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
 .btn-refresh:disabled{opacity:.45;cursor:not-allowed;}
-@media(max-width:500px){.live-lbl,.live-time{display:none;}.today-badge{display:none;}}
+/* Mobile topbar: hide text, show icons only */
+@media(max-width:640px){
+  .live-ind{display:none;}
+  .today-badge{display:none;}
+  .btn-refresh .refresh-label{display:none;}
+  .btn-refresh{padding:6px 9px;}
+  .btn-signout{display:none;}
+  .btn-signout-icon{display:flex;}
+  .lname{font-size:14px;}
+}
 
 /* DESKBAR */
 .deskbar{display:flex;align-items:center;gap:1px;padding:0 clamp(12px,3vw,28px);
@@ -465,7 +482,6 @@ tbody td{padding:11px 14px;font-size:12px;vertical-align:middle;}
   .attdesk{display:none!important;}
   .attlist{display:flex!important;}
   
-  .today-badge{display:none;}
   .summary-row{grid-template-columns:repeat(2,1fr);}
 }
 @media(min-width:1280px){
@@ -752,8 +768,8 @@ function LoginProgress({steps,startTime,dark}){
       <div className="auth-grid"/>
       <div className="auth-card">
         <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:22}}>
-          <div className="lmark">S</div>
-          <span style={{fontFamily:'Playfair Display',fontSize:14,fontWeight:700}}>SRM Portal</span>
+          <div className="lmark">C</div>
+          <span style={{fontFamily:'Playfair Display',fontSize:14,fontWeight:700}}>CampusHub</span>
         </div>
         <div className="loading-bar-wrap" style={{position:'static',marginBottom:8,borderRadius:4,overflow:'hidden',height:4,background:'var(--surf2)'}}>
           <div className="loading-bar" style={{width:pct+'%',height:4}}/>
@@ -897,8 +913,8 @@ export default function Dashboard({
         <div className="auth-card">
           <div className="auth-top">
             <div style={{display:'flex',alignItems:'center',gap:8}}>
-              <div className="lmark">S</div>
-              <span style={{fontFamily:'Playfair Display',fontSize:14,fontWeight:700}}>SRM Portal</span>
+              <div className="lmark">C</div>
+              <span style={{fontFamily:'Playfair Display',fontSize:14,fontWeight:700}}>CampusHub</span>
             </div>
             <button className="ibt" onClick={()=>setDark(d=>!d)}>{dark?'☀':'☾'}</button>
           </div>
@@ -939,8 +955,8 @@ export default function Dashboard({
         <div className="auth-card">
           <div className="auth-top">
             <div style={{display:'flex',alignItems:'center',gap:8}}>
-              <div className="lmark">S</div>
-              <span style={{fontFamily:'Playfair Display',fontSize:14,fontWeight:700}}>SRM Portal</span>
+              <div className="lmark">C</div>
+              <span style={{fontFamily:'Playfair Display',fontSize:14,fontWeight:700}}>CampusHub</span>
             </div>
             <button className="ibt" onClick={()=>setDark(d=>!d)}>{dark?'☀':'☾'}</button>
           </div>
@@ -972,9 +988,9 @@ export default function Dashboard({
 
         {/* TOPBAR */}
         <div className="topbar">
-          <div className="topbar-logo" onClick={()=>setView('landing')}>
-            <div className="lmark">S</div>
-            <span className="lname">SRM <span style={{color:'var(--text2)',fontWeight:400}}>Portal</span></span>
+          <div className="topbar-logo">
+            <div className="lmark">C</div>
+            <span className="lname">Campus<span style={{color:'var(--text2)',fontWeight:400}}>Hub</span></span>
           </div>
           <div className="topbar-right">
             {(todayOrd||todayEvent)&&(
@@ -1000,12 +1016,20 @@ export default function Dashboard({
               </div>
             )}
             {/* Refresh button */}
-            <button className="btn-refresh" onClick={onManualRefresh} disabled={dataLoading} title="Refresh data from SRM portal">
+            <button className="btn-refresh" onClick={onManualRefresh} disabled={dataLoading} title="Refresh data">
               <span style={dataLoading?{display:'inline-block',animation:'spin .7s linear infinite'}:{}}>↻</span>
-              <span>Refresh</span>
+              <span className="refresh-label">Refresh</span>
             </button>
-            <button className="ibt" onClick={()=>setDark(d=>!d)}>{dark?'☀':'☾'}</button>
-            <button className="btn-sm" onClick={()=>setShowLogoutModal(true)}>Sign out</button>
+            <button className="ibt" onClick={()=>setDark(d=>!d)} title={dark?'Light mode':'Dark mode'}>{dark?'☀':'☾'}</button>
+            {/* Desktop sign out */}
+            <button className="btn-signout" onClick={()=>setShowLogoutModal(true)}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign out
+            </button>
+            {/* Mobile sign out icon */}
+            <button className="btn-signout-icon" onClick={()=>setShowLogoutModal(true)} title="Sign out">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
           </div>
         </div>
 

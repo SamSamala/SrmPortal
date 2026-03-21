@@ -23,6 +23,7 @@ export default function App() {
   const [showPass,    setShowPass]    = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
   const [lastUpdatedTs, setLastUpdatedTs] = useState(0);
+  const [showSubscribe, setShowSubscribe] = useState(false);
 
   function saveDataCache(jsonData) {
     try {
@@ -185,7 +186,11 @@ export default function App() {
         }
         setData(json.data);
         saveDataCache(json.data);
-        setView('dashboard');
+        if (!localStorage.getItem('campushub_sub_shown')) {
+          setShowSubscribe(true);
+        } else {
+          setView('dashboard');
+        }
       }
     } catch (err) {
       if (err.name === 'AbortError') setError('Request timed out. SRM portal may be down. Please try again.');
@@ -222,13 +227,33 @@ export default function App() {
         }
         setData(json.data);
         saveDataCache(json.data);
-        setView('dashboard');
+        if (!localStorage.getItem('campushub_sub_shown')) {
+          setShowSubscribe(true);
+        } else {
+          setView('dashboard');
+        }
       }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  }
+
+  // First-time subscribe prompt
+  async function handleSubscribe(subscribe) {
+    localStorage.setItem('campushub_sub_shown', '1');
+    if (subscribe) {
+      try {
+        await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+      } catch (e) {}
+    }
+    setShowSubscribe(false);
+    setView('dashboard');
   }
 
   // Logout
@@ -304,6 +329,51 @@ export default function App() {
     />
   );
 
+  // Subscribe prompt (first-time login only)
+  if (showSubscribe) return <SubscribePrompt email={email} dark={dark} onDone={handleSubscribe} />;
+
   // Everything else (login, captcha, dashboard) handled inside Dashboard
   return <Dashboard {...shared} />;
+}
+
+function SubscribePrompt({ email, dark, onDone }) {
+  const bg = dark ? '#04060d' : '#f5f0e8';
+  const surf = dark ? '#0c1120' : '#fff';
+  const border = dark ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.09)';
+  const text = dark ? '#eef2ff' : '#1a1510';
+  const text2 = dark ? '#8896b3' : '#6b6155';
+  return (
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',
+      background:bg,padding:16,fontFamily:'Plus Jakarta Sans,sans-serif'}}>
+      <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}`}</style>
+      <div style={{background:surf,border:'1px solid '+border,borderRadius:20,
+        padding:'32px 28px',maxWidth:380,width:'100%',
+        boxShadow:'0 24px 48px rgba(0,0,0,.3)',animation:'fadeUp .4s ease both'}}>
+        <div style={{fontSize:32,marginBottom:12,textAlign:'center'}}>📬</div>
+        <div style={{fontSize:20,fontWeight:800,color:text,marginBottom:6,textAlign:'center'}}>Stay in the loop</div>
+        <div style={{fontSize:13,color:text2,lineHeight:1.6,textAlign:'center',marginBottom:22}}>
+          Get notified about new internship postings and campus updates directly to your inbox.
+        </div>
+        <div style={{background:dark?'rgba(255,255,255,.04)':'rgba(0,0,0,.04)',
+          border:'1px solid '+border,borderRadius:10,padding:'10px 14px',
+          fontSize:13,color:text2,marginBottom:20,wordBreak:'break-all'}}>
+          {email}
+        </div>
+        <button onClick={()=>onDone(true)} style={{width:'100%',padding:'12px',borderRadius:10,
+          border:'none',background:'linear-gradient(135deg,#4f8dff,#7c5cfc)',color:'#fff',
+          fontSize:14,fontWeight:700,cursor:'pointer',marginBottom:8,transition:'opacity .15s'}}
+          onMouseOver={e=>e.currentTarget.style.opacity='.88'}
+          onMouseOut={e=>e.currentTarget.style.opacity='1'}>
+          Subscribe →
+        </button>
+        <button onClick={()=>onDone(false)} style={{width:'100%',padding:'11px',borderRadius:10,
+          border:'1px solid '+border,background:'transparent',color:text2,
+          fontSize:13,fontWeight:500,cursor:'pointer',transition:'all .15s'}}
+          onMouseOver={e=>e.currentTarget.style.borderColor='#4f8dff'}
+          onMouseOut={e=>e.currentTarget.style.borderColor=border}>
+          Skip for now
+        </button>
+      </div>
+    </div>
+  );
 }

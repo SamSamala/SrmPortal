@@ -301,7 +301,7 @@ function MockupCard() {
           <div className="mockup-dot" style={{background:'#febc2e'}}/>
           <div className="mockup-dot" style={{background:'#28c840'}}/>
         </div>
-        <div className="mockup-url">academia.srmist.edu.in → SRM Portal</div>
+        <div className="mockup-url">academia.srmist.edu.in → CampusHub</div>
       </div>
       <div className="mockup-inner">
         <div>
@@ -366,8 +366,8 @@ export default function Landing({ onLogin, dark, setDark }) {
         {/* NAV */}
         <nav>
           <div className="nav-logo">
-            <div className="logo-mark">S</div>
-            <span className="logo-name">SRM Portal</span>
+            <div className="logo-mark">C</div>
+            <span className="logo-name">CampusHub</span>
           </div>
           <div className="nav-links">
             {[['Features','features'],['How it Works','how'],['About','about'],['FAQ','faq']].map(([l,id])=>(
@@ -390,7 +390,7 @@ export default function Landing({ onLogin, dark, setDark }) {
         <div className="hero">
           <div className="hero-badge"><div className="badge-ping"/>SRM KTR · Free for all students</div>
           <h1 className="hero-h1">
-            <div className="line1">SRM Portal,</div>
+            <div className="line1">CampusHub,</div>
             <div className="line2">but actually usable.</div>
           </h1>
           <p className="hero-sub">
@@ -439,7 +439,7 @@ export default function Landing({ onLogin, dark, setDark }) {
           <div className="section-inner">
             <div className="compare-table">
               <div className="compare-head">
-                <div>Feature</div><div style={{color:'var(--red)'}}>Official Portal</div><div style={{color:'var(--green)'}}>SRM Portal</div>
+                <div>Feature</div><div style={{color:'var(--red)'}}>Official Portal</div><div style={{color:'var(--green)'}}>CampusHub</div>
               </div>
               {[
                 ['Load time','30-60s','Instant*'],
@@ -564,7 +564,7 @@ export default function Landing({ onLogin, dark, setDark }) {
         {/* FINAL CTA */}
         <div className="cta-section">
           <div className="cta-box">
-            <h2>Start using SRM Portal now</h2>
+            <h2>Start using CampusHub now</h2>
             <p>Check your attendance, marks, and timetable in one clean dashboard. Free forever.</p>
             <button className="btn-primary btn-large" onClick={onLogin}>Login with SRM ID →</button>
             <div className="cta-chips">
@@ -581,8 +581,8 @@ export default function Landing({ onLogin, dark, setDark }) {
         <footer>
           <div className="footer-inner">
             <div className="footer-logo">
-              <div className="logo-mark">S</div>
-              <span style={{fontSize:13,fontWeight:600}}>SRM Portal</span>
+              <div className="logo-mark">C</div>
+              <span style={{fontSize:13,fontWeight:600}}>CampusHub</span>
             </div>
             <div className="footer-links">
               {[['Features','features'],['How it Works','how'],['About','about'],['FAQ','faq']].map(([l,id])=>(

@@ -89,10 +89,12 @@ export default function AdminPage() {
   const [formErr, setFormErr] = useState('');
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [users, setUsers] = useState(null);
+  const [showUsers, setShowUsers] = useState(false);
 
   useEffect(() => {
     const k = typeof window !== 'undefined' ? sessionStorage.getItem('adminKey') : '';
-    if (k) { setAdminKey(k); fetchInternships(k); }
+    if (k) { setAdminKey(k); fetchInternships(k); fetchUsers(k); }
   }, []);
 
   async function fetchInternships(key) {
@@ -103,6 +105,14 @@ export default function AdminPage() {
       setInternships(Array.isArray(d) ? d : []);
     } catch { setInternships([]); }
     setLoading(false);
+  }
+
+  async function fetchUsers(key) {
+    try {
+      const r = await fetch('/api/admin/users', { headers: { 'x-admin-key': key } });
+      const d = await r.json();
+      setUsers(d);
+    } catch { setUsers({ count: 0, emails: [] }); }
   }
 
   async function handleLogin(e) {
@@ -119,6 +129,7 @@ export default function AdminPage() {
     sessionStorage.setItem('adminKey', keyInput);
     setAdminKey(keyInput);
     fetchInternships(keyInput);
+    fetchUsers(keyInput);
   }
 
   function openNew() {
@@ -214,10 +225,24 @@ export default function AdminPage() {
       <style>{css(dark)}</style>
       <div className="wrap">
         <div className="top">
-          <div className="logo">SRM <span>Admin</span></div>
+          <div className="logo">Campus<span>Hub</span> Admin</div>
           <div style={{display:'flex',gap:8}}>
             <button className="btn btn-p btn-sm" onClick={openNew}>+ New Internship</button>
             <button className="btn btn-g btn-sm" onClick={() => { sessionStorage.removeItem('adminKey'); setAdminKey(''); }}>Sign out</button>
+          </div>
+        </div>
+
+        {/* STATS ROW */}
+        <div style={{display:'flex',gap:10,marginBottom:20,flexWrap:'wrap'}}>
+          <div className="card" style={{flex:'1 1 160px',cursor:'pointer',minWidth:140}} onClick={()=>setShowUsers(true)}>
+            <div style={{fontSize:11,fontWeight:700,textTransform:'uppercase',letterSpacing:'.07em',color:'#888',marginBottom:6}}>Total Users</div>
+            <div style={{fontSize:28,fontWeight:800,color:'#4f8dff',fontFamily:'monospace'}}>{users?.count??'–'}</div>
+            <div style={{fontSize:11,color:'#666',marginTop:3}}>click to view all emails</div>
+          </div>
+          <div className="card" style={{flex:'1 1 160px',minWidth:140}}>
+            <div style={{fontSize:11,fontWeight:700,textTransform:'uppercase',letterSpacing:'.07em',color:'#888',marginBottom:6}}>Internship Listings</div>
+            <div style={{fontSize:28,fontWeight:800,color:'#22d17a',fontFamily:'monospace'}}>{internships.length}</div>
+            <div style={{fontSize:11,color:'#666',marginTop:3}}>active postings</div>
           </div>
         </div>
 
@@ -299,6 +324,36 @@ export default function AdminPage() {
             <div className="modal-footer">
               <button className="btn btn-g" onClick={()=>setDeleteId(null)}>Cancel</button>
               <button className="btn btn-r" onClick={handleDelete}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* USERS MODAL */}
+      {showUsers && (
+        <div className="modal-bg" onClick={()=>setShowUsers(false)}>
+          <div className="modal-box" style={{maxWidth:480}} onClick={e=>e.stopPropagation()}>
+            <div className="modal-title">Registered Users ({users?.count ?? 0})</div>
+            {(!users?.emails||users.emails.length===0)
+              ? <p style={{fontSize:13,color:'#888'}}>No users yet.</p>
+              : <div style={{maxHeight:400,overflowY:'auto',margin:'0 -4px'}}>
+                  {(users.emails||[]).map((e,i)=>(
+                    <div key={e} style={{
+                      padding:'9px 4px',
+                      borderBottom:'1px solid rgba(255,255,255,.06)',
+                      fontSize:13,
+                      display:'flex',
+                      alignItems:'center',
+                      gap:10,
+                    }}>
+                      <span style={{fontSize:10,color:'#555',minWidth:24,textAlign:'right'}}>{i+1}</span>
+                      <span>{e}</span>
+                    </div>
+                  ))}
+                </div>
+            }
+            <div className="modal-footer">
+              <button className="btn btn-g" onClick={()=>setShowUsers(false)}>Close</button>
             </div>
           </div>
         </div>
