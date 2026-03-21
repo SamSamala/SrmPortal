@@ -21,10 +21,10 @@ export function calcStats(conducted, absent) {
 
 export function getDayOrder(date) {
   const d=new Date(date);d.setHours(0,0,0,0);
-  if(d.getDay()===0)return null;
+  if(d.getDay()===0||d.getDay()===6)return null;
   const a=new Date(ANCHOR_DATE);a.setHours(0,0,0,0);
   let diff=0,step=d>=a?1:-1,cur=new Date(a);
-  while(cur.toDateString()!==d.toDateString()){cur.setDate(cur.getDate()+step);if(cur.getDay()!==0)diff+=step;}
+  while(cur.toDateString()!==d.toDateString()){cur.setDate(cur.getDate()+step);if(cur.getDay()!==0&&cur.getDay()!==6)diff+=step;}
   return((ANCHOR_ORDER-1+diff)%5+5)%5+1;
 }
 
@@ -471,7 +471,47 @@ tbody td{padding:11px 14px;font-size:12px;vertical-align:middle;}
 @media(min-width:1280px){
   .summary-row{grid-template-columns:repeat(3,1fr);}
 }
+
+/* INTERNSHIPS */
+.int-filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.int-filters select{background:var(--surf);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:12px;padding:6px 10px;cursor:pointer;outline:none;min-width:140px;}
+.int-filters select:focus{border-color:var(--bord2);}
+.int-list{display:flex;flex-direction:column;gap:10px;}
+.int-card{background:var(--surf);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;cursor:pointer;transition:border-color .15s,transform .1s;}
+.int-card:hover{border-color:var(--bord2);transform:translateY(-1px);}
+.int-card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.int-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.3;}
+.int-company{font-size:11px;color:var(--text3);margin-top:2px;}
+.int-stipend{font-size:11px;font-weight:600;color:var(--green);white-space:nowrap;
+  background:rgba(34,209,122,.1);padding:3px 8px;border-radius:6px;border:1px solid rgba(34,209,122,.2);}
+.int-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.int-tag{font-size:10px;padding:2px 7px;border-radius:5px;background:var(--surf2);
+  color:var(--text3);border:1px solid var(--border);}
+.int-tag-sem{color:var(--accent);background:rgba(79,141,255,.1);border-color:rgba(79,141,255,.2);}
+.int-tag-dead{color:var(--red);background:rgba(255,92,92,.08);border-color:rgba(255,92,92,.2);}
+.int-tag-skill{color:var(--acc2);background:rgba(124,92,252,.1);border-color:rgba(124,92,252,.2);}
+/* Internship detail modal */
+.int-detail-modal{background:var(--surf);border:1px solid var(--border);border-radius:18px;
+  padding:24px 22px 20px;max-width:500px;width:100%;max-height:85vh;overflow-y:auto;
+  box-shadow:0 24px 48px rgba(0,0,0,.35);position:relative;}
+.int-modal-close{position:absolute;top:14px;right:14px;background:var(--surf2);border:1px solid var(--border);
+  border-radius:8px;width:28px;height:28px;cursor:pointer;color:var(--text2);font-size:13px;
+  display:flex;align-items:center;justify-content:center;}
+.int-modal-company{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.int-modal-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:12px;padding-right:32px;}
+.int-modal-meta{font-size:12px;color:var(--text2);margin-bottom:5px;}
+.int-modal-section{margin-top:14px;}
+.int-modal-sh{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--text3);margin-bottom:4px;}
+.int-modal-body{font-size:13px;color:var(--text2);line-height:1.6;white-space:pre-wrap;}
+.int-apply-btn{display:block;margin-top:18px;padding:12px;border-radius:10px;
+  background:var(--accent);color:#fff;font-size:14px;font-weight:600;text-align:center;
+  text-decoration:none;transition:opacity .15s;}
+.int-apply-btn:hover{opacity:.88;}
 `;
+
 }
 
 // -- Loading steps ------------------------------------------------------------
@@ -551,27 +591,27 @@ function isProgramRelevant(event, program) {
   return mentioned.some(k=>p.replace(/[.\s]/g,'').includes(k.replace(/[.\s]/g,'')));
 }
 
+function getPlannerInfo(date, plannerData) {
+  if(!date) return null;
+  const dow=date.getDay();
+  if(dow===0||dow===6) return {order:null, event:'Weekend', _weekend:true};
+  if(!plannerData) return {order:getDayOrder(date), event:null};
+  const key=date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
+  const info=plannerData[key];
+  if(!info) return {order:getDayOrder(date), event:null};
+  // Backwards-compat: old format used "holiday" field
+  if(info.holiday!==undefined && info.event===undefined)
+    return {order:info.order, event:info.holiday||null};
+  return info;
+}
+
 function Calendar({ dark, onSelectDay, plannerData, program }) {
   const today = new Date();
   const [mo,setMo]=useState(today.getMonth());
   const [yr,setYr]=useState(today.getFullYear());
   const days=getMonthDays(yr,mo);
   const prev=()=>{if(mo===0){setMo(11);setYr(y=>y-1);}else setMo(m=>m-1);};
-  const next=()=>{if(mo===11){setMo(0);setYr(y=>y+1);}else setMo(m=>m+1);};
-
-  function getPlannerInfo(date) {
-    if(!date) return null;
-    const dow=date.getDay();
-    if(dow===0||dow===6) return {order:null, event:'Weekend', _weekend:true};
-    if(!plannerData) return {order:getDayOrder(date), event:null};
-    const key=date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
-    const info=plannerData[key];
-    if(!info) return {order:getDayOrder(date), event:null};
-    // Backwards-compat: old format used "holiday" field
-    if(info.holiday!==undefined && info.event===undefined)
-      return {order:info.order, event:info.holiday||null};
-    return info;
-  }
+  const next=()=>{if(mo===11){setMo(0);setYr(y=>y+1);}else setMo(m=>m+1);}
 
   // All events for current month (excludes weekends and working days with no event)
   const monthEvents = (() => {
@@ -579,7 +619,7 @@ function Calendar({ dark, onSelectDay, plannerData, program }) {
     const daysInMonth = new Date(yr, mo+1, 0).getDate();
     for(let d=1; d<=daysInMonth; d++) {
       const date = new Date(yr, mo, d);
-      const info = getPlannerInfo(date);
+      const info = getPlannerInfo(date, plannerData);
       if(!info||info._weekend) continue;
       // Show: named events (all types), and also working days that have an event
       if(info.event) {
@@ -601,7 +641,7 @@ function Calendar({ dark, onSelectDay, plannerData, program }) {
           {DOW_SHORT.map(d=><div key={d} className="cdow">{d}</div>)}
           {days.map((date,i)=>{
             if(!date)return<div key={i}/>;
-            const info=getPlannerInfo(date);
+            const info=getPlannerInfo(date, plannerData);
             const isToday=date.toDateString()===today.toDateString();
             const isWeekend=date.getDay()===0||date.getDay()===6;
             const ord=info?info.order:null;
@@ -776,15 +816,33 @@ export default function Dashboard({
   const [loginStartTime,setLoginStartTime]=useState(null);
   const [plannerData,setPlannerData]=useState(null);
   const [showLogoutModal,setShowLogoutModal]=useState(false);
+  const [internships,setInternships]=useState(null);
+  const [internLoading,setInternLoading]=useState(false);
+  const [deptFilter,setDeptFilter]=useState('');
+  const [semFilter,setSemFilter]=useState('');
+  const [selectedInternship,setSelectedInternship]=useState(null);
 
-  useEffect(()=>{const o=getDayOrder(new Date());if(o)setActiveDay('Day '+o);},[]);
+  useEffect(()=>{const info=getPlannerInfo(new Date(),plannerData);if(info?.order)setActiveDay('Day '+info.order);},[plannerData]);
 
   useEffect(()=>{
     if(!data) return;
     if(data.plannerData) setPlannerData(data.plannerData);
   },[data]);
   useEffect(()=>{if(loading)setLoginStartTime(Date.now());},[loading]);
-
+  useEffect(()=>{
+    if(tab!=='internships'||internships!==null)return;
+    setInternLoading(true);
+    fetch('/api/internships').then(r=>r.json()).then(d=>{
+      setInternships(Array.isArray(d)?d:[]);
+      setInternLoading(false);
+    }).catch(()=>{setInternships([]);setInternLoading(false);});
+  },[tab]);
+  // Pre-fill filters when student data loads
+  useEffect(()=>{
+    if(!data?.student)return;
+    if(!deptFilter)setDeptFilter(data.student.department||'');
+    if(!semFilter)setSemFilter(data.student.semester||'');
+  },[data]);
 
   function goTab(t){setTab(t);}
 
@@ -799,10 +857,9 @@ export default function Dashboard({
   tt.forEach(p=>{if(ttByDay[p.day])ttByDay[p.day].push(p);});
   Object.values(ttByDay).forEach(a=>a.sort((x,y)=>x.period-y.period));
   const _td=new Date();
-  const _tdKey=_td.getFullYear()+'-'+String(_td.getMonth()+1).padStart(2,'0')+'-'+String(_td.getDate()).padStart(2,'0');
-  const _tdPInfo=plannerData?plannerData[_tdKey]:null;
-  const todayOrd=_tdPInfo?.order!=null?_tdPInfo.order:(_tdPInfo?null:getDayOrder(_td));
-  const todayEvent=_tdPInfo?.event||((!_tdPInfo?.order&&_tdPInfo)?'Holiday':null);
+  const _tdInfo=getPlannerInfo(_td,plannerData);
+  const todayOrd=_tdInfo?.order||null;
+  const todayEvent=(_tdInfo&&!_tdInfo._weekend)?_tdInfo.event||null:null;
   const OC=dark?OC_DARK:OC_LIGHT;
   const pCol=(risk)=>risk==='danger'?'var(--red)':risk==='warning'?'var(--yellow)':'var(--green)';
 
@@ -812,6 +869,7 @@ export default function Dashboard({
     marks:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
     timetable:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>,
     calendar:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+    internships:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="12"/><path d="M12 12h.01"/></svg>,
   };
   const NAV=[
     {k:'dashboard',l:'Home'},
@@ -819,6 +877,7 @@ export default function Dashboard({
     {k:'marks',l:'Marks'},
     {k:'timetable',l:'Timetable'},
     {k:'calendar',l:'Calendar'},
+    {k:'internships',l:'Internships'},
   ];
 
   // -- Loading screen --
@@ -998,6 +1057,12 @@ export default function Dashboard({
                         </div>
                       ));
                     })()}
+                    <div className="scard" style={{cursor:'pointer'}} onClick={()=>goTab('internships')}>
+                      <div className="scard-lbl">Internships</div>
+                      <div className="scard-val" style={{color:'var(--acc2)'}}>{internships===null?'–':internships.length}</div>
+                      <div className="scard-sub">tap to browse openings</div>
+                      <div className="scard-bar" style={{background:'linear-gradient(90deg,var(--acc2),transparent)'}}/>
+                    </div>
                   </div>
                 </>
               )}
@@ -1123,6 +1188,51 @@ export default function Dashboard({
                   <p style={{marginTop:10,fontSize:11,color:'var(--text3)'}}>Tap any date to view that day's timetable.</p>
                 </>
               )}
+
+              {/* INTERNSHIPS TAB */}
+              {tab==='internships'&&(()=>{
+                const allDepts=[...new Set((internships||[]).flatMap(i=>i.departments||[]))].sort();
+                const filtered=(internships||[]).filter(i=>{
+                  const dMatch=!deptFilter||(i.departments||[]).some(d=>d.toLowerCase().includes(deptFilter.toLowerCase()));
+                  const sMatch=!semFilter||(i.semesters||[]).includes(String(semFilter));
+                  return dMatch&&sMatch;
+                });
+                return(
+                  <>
+                    <div className="seclbl">Internships</div>
+                    <div className="int-filters">
+                      <select value={deptFilter} onChange={e=>setDeptFilter(e.target.value)}>
+                        <option value="">All Departments</option>
+                        {allDepts.map(d=><option key={d} value={d}>{d}</option>)}
+                      </select>
+                      <select value={semFilter} onChange={e=>setSemFilter(e.target.value)}>
+                        <option value="">All Semesters</option>
+                        {['1','2','3','4','5','6','7','8'].map(s=><option key={s} value={s}>Semester {s}</option>)}
+                      </select>
+                    </div>
+                    {internLoading&&<div className="empty">Loading…</div>}
+                    {!internLoading&&filtered.length===0&&<div className="empty">{internships?.length===0?'No internships posted yet.':'No results for selected filters.'}</div>}
+                    <div className="int-list">
+                      {filtered.map(i=>(
+                        <div key={i.id} className="int-card" onClick={()=>setSelectedInternship(i)}>
+                          <div className="int-card-top">
+                            <div style={{flex:1,minWidth:0}}>
+                              <div className="int-title">{i.title}</div>
+                              <div className="int-company">{i.company}{i.location?(' · '+i.location):''}</div>
+                            </div>
+                            {i.stipend&&<span className="int-stipend">{i.stipend}</span>}
+                          </div>
+                          <div className="int-tags">
+                            {(i.departments||[]).slice(0,2).map(d=><span key={d} className="int-tag">{d}</span>)}
+                            {(i.semesters||[]).length>0&&<span className="int-tag int-tag-sem">Sem {(i.semesters||[]).join(', ')}</span>}
+                            {i.deadline&&<span className="int-tag int-tag-dead">Due {new Date(i.deadline).toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
             </>
           )}
         </div>
@@ -1151,6 +1261,47 @@ export default function Dashboard({
               <button className="modal-cancel" onClick={()=>setShowLogoutModal(false)}>Cancel</button>
               <button className="modal-signout" onClick={()=>{setShowLogoutModal(false);logout();}}>Sign out</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* INTERNSHIP DETAIL MODAL */}
+      {selectedInternship&&(
+        <div className="modal-overlay" onClick={()=>setSelectedInternship(null)}>
+          <div className="int-detail-modal" onClick={e=>e.stopPropagation()}>
+            <button className="int-modal-close" onClick={()=>setSelectedInternship(null)}>✕</button>
+            <div className="int-modal-company">{selectedInternship.company}</div>
+            <div className="int-modal-title">{selectedInternship.title}</div>
+            {selectedInternship.location&&<div className="int-modal-meta">📍 {selectedInternship.location}</div>}
+            {selectedInternship.stipend&&<div className="int-modal-meta">💰 {selectedInternship.stipend}</div>}
+            {selectedInternship.deadline&&<div className="int-modal-meta">⏰ Deadline: {new Date(selectedInternship.deadline).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div>}
+            {selectedInternship.description&&(
+              <div className="int-modal-section">
+                <div className="int-modal-sh">About</div>
+                <div className="int-modal-body">{selectedInternship.description}</div>
+              </div>
+            )}
+            {(selectedInternship.semesters||[]).length>0&&(
+              <div className="int-modal-section">
+                <div className="int-modal-sh">Eligible Semesters</div>
+                <div className="int-tags" style={{marginTop:4}}>{(selectedInternship.semesters||[]).map(s=><span key={s} className="int-tag int-tag-sem">Sem {s}</span>)}</div>
+              </div>
+            )}
+            {(selectedInternship.departments||[]).length>0&&(
+              <div className="int-modal-section">
+                <div className="int-modal-sh">Departments</div>
+                <div className="int-tags" style={{marginTop:4}}>{(selectedInternship.departments||[]).map(d=><span key={d} className="int-tag">{d}</span>)}</div>
+              </div>
+            )}
+            {(selectedInternship.skills||[]).length>0&&(
+              <div className="int-modal-section">
+                <div className="int-modal-sh">Skills Required</div>
+                <div className="int-tags" style={{marginTop:4}}>{(selectedInternship.skills||[]).map(s=><span key={s} className="int-tag int-tag-skill">{s}</span>)}</div>
+              </div>
+            )}
+            {selectedInternship.applyLink&&(
+              <a href={selectedInternship.applyLink} target="_blank" rel="noopener noreferrer" className="int-apply-btn">Apply Now →</a>
+            )}
           </div>
         </div>
       )}
