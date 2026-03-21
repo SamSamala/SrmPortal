@@ -172,24 +172,24 @@ input,button,select{font-family:inherit;}
   border-radius:8px;display:flex;align-items:center;justify-content:center;
   cursor:pointer;color:var(--text2);font-size:14px;transition:all .15s;display:none;}
 .btn-signout-icon:hover{border-color:var(--red);color:var(--red);}
-.live-ind{display:flex;align-items:center;gap:4px;padding:4px 8px;
-  background:var(--surf2);border:1px solid var(--border);border-radius:8px;}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;
   box-shadow:0 0 5px var(--green);}
-.live-lbl{font-size:10px;font-weight:700;color:var(--green);font-family:'Varela Round',sans-serif;letter-spacing:.03em;}
-.live-time{font-size:10px;color:var(--text3);font-family:'Varela Round',sans-serif;}
-.btn-refresh{display:flex;align-items:center;gap:5px;padding:5px 11px;
+.live-lbl{font-size:9px;font-weight:700;color:var(--green);font-family:'Varela Round',sans-serif;letter-spacing:.03em;}
+.live-time{font-size:9px;color:var(--text3);font-family:'Varela Round',sans-serif;}
+.btn-refresh{display:flex;align-items:center;gap:8px;padding:5px 12px;
   background:var(--surf2);border:1px solid var(--border);border-radius:8px;
-  color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;
-  transition:all .15s;}
+  color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .15s;text-align:left;}
 .btn-refresh:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
+.btn-refresh:hover:not(:disabled) .live-lbl{color:var(--accent);}
+.btn-refresh:hover:not(:disabled) .live-dot{background:var(--accent);box-shadow:0 0 5px var(--accent);}
 .btn-refresh:disabled{opacity:.45;cursor:not-allowed;}
-/* Mobile topbar: hide text, show icons only */
+.refresh-icon{font-size:14px;flex-shrink:0;line-height:1;}
+.refresh-inner{display:flex;flex-direction:column;gap:1px;}
+.refresh-top{font-size:11px;font-weight:600;line-height:1.2;}
+.refresh-bottom{display:flex;align-items:center;gap:4px;}
+/* Mobile topbar */
 @media(max-width:640px){
-  .live-ind{display:none;}
   .today-badge{display:none;}
-  .btn-refresh .refresh-label{display:none;}
-  .btn-refresh{padding:6px 9px;}
   .btn-signout{display:none;}
   .btn-signout-icon{display:flex;}
   .lname{font-size:14px;}
@@ -998,27 +998,21 @@ export default function Dashboard({
                 {todayOrd?'Day '+todayOrd:todayEvent||'Holiday'} · Today
               </div>
             )}
-            {/* Live indicator */}
-            {lastUpdatedTs>0&&(
-              <div className="live-ind">
-                {dataLoading?(
-                  <>
-                    <span style={{display:'inline-block',animation:'spin .7s linear infinite',fontSize:13,color:'var(--accent)'}}>↻</span>
-                    <span className="live-time">Updating...</span>
-                  </>
-                ):(
-                  <>
-                    <div className="live-dot"/>
+            {/* Combined refresh + live button */}
+            <button className="btn-refresh" onClick={onManualRefresh} disabled={dataLoading} title="Refresh data">
+              <span style={dataLoading?{display:'inline-block',animation:'spin .7s linear infinite'}:{}} className="refresh-icon">↻</span>
+              <span className="refresh-inner">
+                <span className="refresh-top">
+                  {dataLoading?<span style={{color:'var(--accent)'}}>Updating...</span>:<span>Refresh</span>}
+                </span>
+                {lastUpdatedTs>0&&!dataLoading&&(
+                  <span className="refresh-bottom">
+                    <span className="live-dot"/>
                     <span className="live-lbl">Live</span>
                     <span className="live-time">{formatUpdTime(lastUpdatedTs)}</span>
-                  </>
+                  </span>
                 )}
-              </div>
-            )}
-            {/* Refresh button */}
-            <button className="btn-refresh" onClick={onManualRefresh} disabled={dataLoading} title="Refresh data">
-              <span style={dataLoading?{display:'inline-block',animation:'spin .7s linear infinite'}:{}}>↻</span>
-              <span className="refresh-label">Refresh</span>
+              </span>
             </button>
             <button className="ibt" onClick={()=>setDark(d=>!d)} title={dark?'Light mode':'Dark mode'}>{dark?'☀':'☾'}</button>
             {/* Desktop sign out */}
