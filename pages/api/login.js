@@ -1,5 +1,5 @@
 // Login API — authenticates user against SRM portal and stores session in Redis
-const { startLogin, trackUser } = require('../../lib/scraper');
+// When BACKEND_URL is set (Vercel), proxies to Railway backend instead of running Playwright locally
 
 export const config = {
   api: {
@@ -13,6 +13,25 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Proxy mode: forward to Railway backend when running on Vercel
+  if (process.env.BACKEND_URL) {
+    try {
+      const r = await fetch(process.env.BACKEND_URL + '/api/login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(req.body),
+      });
+      const cookie = r.headers.get('set-cookie');
+      if (cookie) res.setHeader('Set-Cookie', cookie);
+      const data = await r.json();
+      return res.status(r.status).json(data);
+    } catch (e) {
+      return res.status(502).json({ error: 'Backend unreachable. Please try again.' });
+    }
+  }
+
+  const { startLogin, trackUser } = require('../../lib/scraper');
 
   const { email, password, sessionToken, forceRefresh } = req.body || {};
 
