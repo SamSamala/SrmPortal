@@ -10,12 +10,19 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Dates must be YYYY-MM-DD' });
 
   try {
-    const studentData = await db.getStudentCache(email);
-    if (!studentData) return res.status(404).json({ error: 'No data cached for this user. Please log in first.' });
-
-    const att = studentData.attendance || [];
-    const tt = Array.isArray(studentData.timetable) ? studentData.timetable : [];
-    const plannerData = studentData.plannerData || null;
+    // Use data sent directly in body (already loaded on frontend), fallback to DB cache
+    let att, tt, plannerData;
+    if (req.body.attendance) {
+      att = req.body.attendance || [];
+      tt = Array.isArray(req.body.timetable) ? req.body.timetable : [];
+      plannerData = req.body.plannerData || null;
+    } else {
+      const studentData = await db.getStudentCache(email);
+      if (!studentData) return res.status(404).json({ error: 'No data cached for this user. Please log in first.' });
+      att = studentData.attendance || [];
+      tt = Array.isArray(studentData.timetable) ? studentData.timetable : [];
+      plannerData = studentData.plannerData || null;
+    }
 
     const ttByDay = { 'Day 1':[], 'Day 2':[], 'Day 3':[], 'Day 4':[], 'Day 5':[] };
     tt.forEach(p => { if (ttByDay[p.day]) ttByDay[p.day].push(p); });

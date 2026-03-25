@@ -974,7 +974,7 @@ export default function Dashboard({
       const res = await fetch('/api/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, from: predFrom, to: predTo }),
+        body: JSON.stringify({ email, from: predFrom, to: predTo, attendance: att, timetable: Array.isArray(data?.timetable)?data.timetable:[], plannerData }),
       });
       const json = await res.json();
       setPredResult(res.ok ? json : { error: json.error || 'Prediction failed' });
