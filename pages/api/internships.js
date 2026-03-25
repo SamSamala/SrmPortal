@@ -1,5 +1,6 @@
-// pages/api/internships.js — CRUD API for internships (public GET, admin POST/PUT/DELETE)
+// pages/api/internships.js — CRUD API for internships (pro-only GET, admin POST/PUT/DELETE)
 const db = require('../../lib/db');
+const { isProActive } = db;
 const { randomUUID } = require('crypto');
 
 async function initDb() {
@@ -38,6 +39,18 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
+    // Require a logged-in pro subscriber
+    const token = req.cookies?.sessionId;
+    if (!token) return res.status(401).json({ error: 'Login required' });
+    let email;
+    try {
+      email = Buffer.from(token, 'base64').toString('utf8');
+    } catch {
+      return res.status(401).json({ error: 'Invalid session' });
+    }
+    const pro = await isProActive(email);
+    if (!pro) return res.status(403).json({ error: 'pro_required', message: 'Upgrade to Pro to access internships' });
+
     try {
       const { rows } = await db.query(
         'SELECT * FROM internships ORDER BY created_at DESC'
