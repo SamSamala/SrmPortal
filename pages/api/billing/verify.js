@@ -28,8 +28,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid payment signature' });
   }
 
-  // Grant Pro access for 1 year
-  const current_period_end = Date.now() + 365 * 24 * 60 * 60 * 1000;
+  // Grant Pro access for 1 month
+  const current_period_end = Date.now() + 30 * 24 * 60 * 60 * 1000;
 
   await upsertSubscription(email, {
     plan:   'pro',
