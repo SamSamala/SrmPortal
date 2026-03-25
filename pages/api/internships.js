@@ -49,7 +49,11 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Invalid session' });
     }
     const pro = await isProActive(email);
-    if (!pro) return res.status(403).json({ error: 'pro_required', message: 'Upgrade to Pro to access internships' });
+    if (!pro) {
+      // Return count only so the dashboard can show "X internships available (locked)"
+      const { rows: countRows } = await db.query('SELECT COUNT(*)::int AS cnt FROM internships');
+      return res.status(403).json({ error: 'pro_required', count: countRows[0]?.cnt ?? 0 });
+    }
 
     try {
       const { rows } = await db.query(
