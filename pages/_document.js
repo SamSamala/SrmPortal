@@ -22,7 +22,7 @@ export default function Document() {
         <meta property="og:site_name" content="SRM Portal" />
         <meta property="og:title" content="SRM Portal – Works on WiFi &amp; Mobile Data" />
         <meta property="og:description" content="Track attendance, marks &amp; timetable instantly — works both on SRM WiFi and mobile network." />
-        <meta property="og:image" content="https://srm-campus-hub.vercel.app/og.svg" />
+        <meta property="og:image" content="https://srm-campus-hub.vercel.app/api/og" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="SRM Portal – Works on WiFi &amp; Mobile Data" />
@@ -32,7 +32,7 @@ export default function Document() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="SRM Portal – Works on WiFi &amp; Mobile Data" />
         <meta name="twitter:description" content="Attendance, marks &amp; timetable — accessible on SRM WiFi and mobile network." />
-        <meta name="twitter:image" content="https://srm-campus-hub.vercel.app/og.svg" />
+        <meta name="twitter:image" content="https://srm-campus-hub.vercel.app/api/og" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
