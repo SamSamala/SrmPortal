@@ -68,7 +68,7 @@ function MarksGraph({ tests, dark }) {
     <div className="mgraph">
       <div className="mgraph-hd">
         <div className="mgraph-leg"><div className="mgraph-dot" style={{background:acc}}/><span>Percentage</span></div>
-        {totalMax>0&&<div className="mgraph-tot" style={{color:acc}}>{(totalScored*100/totalMax).toFixed(2)}% &nbsp;<span style={{fontWeight:400,fontSize:9,color:t3}}>({parseFloat(totalScored.toFixed(2))}/{totalMax})</span></div>}
+        {totalMax>0&&<div className="mgraph-tot" style={{color:acc}}>{(totalScored*100/totalMax).toFixed(2)}% &nbsp;<span style={{fontWeight:400,fontSize:9,color:t3}}>({totalScored}/{totalMax})</span></div>}
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{width:'100%',height:H,display:'block',overflow:'visible'}}>
         {/* Horizontal grid lines */}
@@ -848,10 +848,12 @@ function timeAgo(ts) {
   return new Date(ts).toLocaleDateString('en-IN', {day:'numeric', month:'short'});
 }
 
-// Parse LinkedIn age string (e.g. "5d","2w","1mo","3h") scraped at createdAt,
-// compute original post date, then return live relative age.
-function liveLinkedInAge(desc, createdAt) {
-  if (!desc || !createdAt) return null;
+// Parse LinkedIn age string (e.g. "5d","2w","1mo","3h") that was scraped on
+// the reference date (25 March 2026). Compute original LinkedIn post date,
+// then return live relative age from now.
+const SCRAPE_REF_DATE = new Date('2026-03-25T12:00:00+05:30').getTime();
+function liveLinkedInAge(desc) {
+  if (!desc) return null;
   const m = desc.match(/^\[(.+?)\]/);
   if (!m) return null;
   const raw = m[1].trim();
@@ -864,7 +866,7 @@ function liveLinkedInAge(desc, createdAt) {
   else if (/h/i.test(raw)) ms = num * 60 * 60 * 1000;
   else if (/m/i.test(raw)) ms = num * 60 * 1000;
   else return raw;
-  const postedAt = createdAt - ms;
+  const postedAt = SCRAPE_REF_DATE - ms;
   const diff = Date.now() - postedAt;
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return mins + 'm';
@@ -925,7 +927,7 @@ export default function Dashboard({
 
   // Add-to-homescreen logic
   useEffect(()=>{
-    if(localStorage.getItem('srm_a2hs_dismissed')) return;
+    if(sessionStorage.getItem('srm_a2hs_dismissed')) return;
     const isIos=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
     const isStandalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
     if(isStandalone) return; // already installed
@@ -938,9 +940,9 @@ export default function Dashboard({
   function handleInstall(){
     if(!deferredPrompt)return;
     deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(()=>{setDeferredPrompt(null);setShowInstallBanner(false);localStorage.setItem('srm_a2hs_dismissed','1');});
+    deferredPrompt.userChoice.then(()=>{setDeferredPrompt(null);setShowInstallBanner(false);sessionStorage.setItem('srm_a2hs_dismissed','1');});
   }
-  function dismissInstall(){setShowInstallBanner(false);setShowIosInstructions(false);localStorage.setItem('srm_a2hs_dismissed','1');}
+  function dismissInstall(){setShowInstallBanner(false);setShowIosInstructions(false);sessionStorage.setItem('srm_a2hs_dismissed','1');}
 
   useEffect(()=>{const info=getPlannerInfo(new Date(),plannerData);if(info?.order)setActiveDay('Day '+info.order);},[plannerData]);
 
@@ -1280,7 +1282,7 @@ export default function Dashboard({
                         </div>
                         <div className="scard" style={{cursor:'pointer'}} onClick={()=>goTab('marks')}>
                           <div className="scard-lbl">Internal Marks</div>
-                          <div className="scard-val" style={{color:'var(--accent)'}}>{totMax>0?(totScored.toFixed(2)+' / '+totMax):'–'}</div>
+                          <div className="scard-val" style={{color:'var(--accent)'}}>{totMax>0?(totScored+' / '+totMax):'–'}</div>
                           <div className="scard-sub">across {marks.length} subjects</div>
                           <div className="scard-bar" style={{background:'linear-gradient(90deg,var(--accent),transparent)'}}/>
                         </div>
@@ -1388,7 +1390,7 @@ export default function Dashboard({
                                   {m.tests.map((t,j)=>(
                                     <div key={j} className="tpill">
                                       <div className="tpill-n">{t.name}</div>
-                                      <div className="tpill-s" style={{color:t.scored===null?'var(--red)':'var(--green)'}}>{t.scored===null?'AB':parseFloat(Number(t.scored).toFixed(2))}</div>
+                                      <div className="tpill-s" style={{color:t.scored===null?'var(--red)':'var(--green)'}}>{t.scored===null?'AB':t.scored}</div>
                                       <div className="tpill-m">/{t.maxMarks}</div>
                                     </div>
                                   ))}
@@ -1507,7 +1509,7 @@ export default function Dashboard({
                               <div className="int-title">{i.title}</div>
                               <div className="int-company">
                                 {i.company}{i.location?(' · '+i.location):''}
-                                {(()=>{const age=liveLinkedInAge(i.description,i.createdAt);return age?<span style={{color:'var(--text3)',opacity:.7}}> · {age}</span>:null;})()}
+                                {(()=>{const age=liveLinkedInAge(i.description);return age?<span style={{color:'var(--text3)',opacity:.7}}> · {age}</span>:null;})()}
                               </div>
                             </div>
                             {i.stipend&&<span className="int-stipend">{i.stipend}</span>}
@@ -1583,7 +1585,10 @@ export default function Dashboard({
         <div className="modal-overlay" onClick={()=>setSelectedInternship(null)}>
           <div className="int-detail-modal" onClick={e=>e.stopPropagation()}>
             <button className="int-modal-close" onClick={()=>setSelectedInternship(null)}>✕</button>
-            <div className="int-modal-company">{selectedInternship.company}</div>
+            <div className="int-modal-company">
+              {selectedInternship.company}
+              {(()=>{const age=liveLinkedInAge(selectedInternship.description);return age?<span style={{color:'var(--text3)',fontWeight:400,fontSize:12}}> · {age}</span>:null;})()}
+            </div>
             <div className="int-modal-title">{selectedInternship.title}</div>
             {selectedInternship.location&&<div className="int-modal-meta">📍 {selectedInternship.location}</div>}
             {selectedInternship.stipend&&<div className="int-modal-meta">💰 {selectedInternship.stipend}</div>}
@@ -1591,7 +1596,7 @@ export default function Dashboard({
             {selectedInternship.description&&(
               <div className="int-modal-section">
                 <div className="int-modal-sh">About</div>
-                <div className="int-modal-body">{selectedInternship.description}</div>
+                <div className="int-modal-body">{selectedInternship.description.replace(/^\[.+?\]\s*/,'')}</div>
               </div>
             )}
             {(selectedInternship.departments||[]).length>0&&(
