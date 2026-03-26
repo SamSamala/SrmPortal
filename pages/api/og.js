@@ -43,30 +43,44 @@ export default function handler() {
         <div style={{
           display: 'flex', alignItems: 'center', gap: '16px',
           padding: '52px 80px 0',
+          justifyContent: 'space-between',
         }}>
-          {/* Icon */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* Icon */}
+            <div style={{
+              width: '56px', height: '56px', borderRadius: '14px',
+              background: 'linear-gradient(135deg, #6366f1, #3b82f6)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '30px',
+            }}>🎓</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <span style={{ color: 'rgba(255,255,255,0.92)', fontSize: '22px', fontWeight: 700 }}>SRM Portal</span>
+              <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '14px' }}>srm-campus-hub.vercel.app</span>
+            </div>
+          </div>
+          {/* FREE badge top-right */}
           <div style={{
-            width: '56px', height: '56px', borderRadius: '14px',
-            background: 'linear-gradient(135deg, #6366f1, #3b82f6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '30px',
-          }}>🎓</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span style={{ color: 'rgba(255,255,255,0.92)', fontSize: '22px', fontWeight: 700 }}>SRM Portal</span>
-            <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '14px' }}>srm-campus-hub.vercel.app</span>
+            display: 'flex', alignItems: 'center', gap: '8px',
+            background: 'linear-gradient(135deg, rgba(74,222,128,0.18), rgba(34,197,94,0.12))',
+            border: '1.5px solid rgba(74,222,128,0.5)',
+            borderRadius: '999px',
+            padding: '10px 24px',
+          }}>
+            <span style={{ fontSize: '18px' }}>✅</span>
+            <span style={{ color: '#4ade80', fontSize: '20px', fontWeight: 800, letterSpacing: '1px' }}>100% FREE</span>
           </div>
         </div>
 
         {/* Main content */}
         <div style={{
-          display: 'flex', flexDirection: 'column', gap: '12px',
-          padding: '44px 80px 0',
+          display: 'flex', flexDirection: 'column', gap: '10px',
+          padding: '36px 80px 0',
           flex: 1,
         }}>
           <div style={{
             display: 'flex',
             color: 'white',
-            fontSize: '68px',
+            fontSize: '64px',
             fontWeight: 800,
             lineHeight: 1.05,
             letterSpacing: '-2px',
@@ -78,7 +92,7 @@ export default function handler() {
             background: 'linear-gradient(90deg, #818cf8, #60a5fa)',
             backgroundClip: 'text',
             color: 'transparent',
-            fontSize: '68px',
+            fontSize: '64px',
             fontWeight: 800,
             lineHeight: 1.05,
             letterSpacing: '-2px',
@@ -86,13 +100,21 @@ export default function handler() {
             Mobile Data
           </div>
           <div style={{
-            display: 'flex',
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: '24px',
-            fontWeight: 400,
-            marginTop: '8px',
+            display: 'flex', alignItems: 'center', gap: '16px',
+            marginTop: '10px',
           }}>
-            Your SRM academics, finally clear.
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '22px', fontWeight: 400 }}>
+              Your SRM academics, finally clear.
+            </span>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              background: 'rgba(74,222,128,0.12)',
+              border: '1px solid rgba(74,222,128,0.35)',
+              borderRadius: '999px',
+              padding: '5px 16px',
+            }}>
+              <span style={{ color: '#4ade80', fontSize: '15px', fontWeight: 700 }}>No signup fee · No hidden cost</span>
+            </div>
           </div>
         </div>
 
