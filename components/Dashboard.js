@@ -1485,6 +1485,7 @@ export default function Dashboard({
                           <div className="int-tags">
                             {(i.departments||[]).slice(0,2).map(d=><span key={d} className="int-tag">{d}</span>)}
                             {i.deadline&&<span className="int-tag int-tag-dead">Due {new Date(i.deadline).toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</span>}
+                            {i.createdAt&&<span className="int-tag" style={{marginLeft:'auto',opacity:.7}}>{timeAgo(i.createdAt)}</span>}
                           </div>
                         </div>
                       ))}
