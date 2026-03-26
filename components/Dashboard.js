@@ -422,48 +422,78 @@ tbody td{padding:11px 14px;font-size:12px;vertical-align:middle;}
   transition:width .4s ease;box-shadow:0 0 10px var(--accent);}
 
 /* AUTH */
-.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;
-  padding:20px;background:var(--bg);position:relative;}
-.auth-wrap::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:${d?
-    'radial-gradient(ellipse 700px 600px at 30% 20%,rgba(79,141,255,.15) 0%,transparent 55%),radial-gradient(ellipse 500px 400px at 80% 80%,rgba(124,92,252,.12) 0%,transparent 55%)'
-    :'radial-gradient(ellipse 700px 600px at 30% 20%,rgba(37,99,235,.08) 0%,transparent 55%),radial-gradient(ellipse 500px 400px at 80% 80%,rgba(124,58,237,.06) 0%,transparent 55%)'
-  };}
+.auth-wrap{min-height:100vh;display:flex;align-items:stretch;background:var(--bg);position:relative;overflow:hidden;}
+.auth-orb1{position:fixed;width:650px;height:650px;border-radius:50%;top:-220px;left:-180px;pointer-events:none;z-index:0;
+  background:radial-gradient(circle,${d?'rgba(79,141,255,.18)':'rgba(37,99,235,.1)'},transparent 65%);filter:blur(90px);}
+.auth-orb2{position:fixed;width:500px;height:500px;border-radius:50%;bottom:-160px;right:-120px;pointer-events:none;z-index:0;
+  background:radial-gradient(circle,${d?'rgba(124,92,252,.16)':'rgba(124,58,237,.09)'},transparent 65%);filter:blur(90px);}
 .auth-grid{position:fixed;inset:0;pointer-events:none;z-index:0;
   background-image:linear-gradient(${d?'rgba(255,255,255,.025)':'rgba(0,0,0,.04)'} 1px,transparent 1px),
     linear-gradient(90deg,${d?'rgba(255,255,255,.025)':'rgba(0,0,0,.04)'} 1px,transparent 1px);
   background-size:48px 48px;
-  mask-image:radial-gradient(ellipse 90% 80% at 50% 0%,black 30%,transparent 80%);}
-.auth-card{width:100%;max-width:380px;background:var(--surf);border:1px solid var(--bord2);
-  border-radius:18px;padding:clamp(22px,5vw,30px);position:relative;z-index:1;
-  box-shadow:0 24px 64px ${d?'rgba(0,0,0,.5)':'rgba(0,0,0,.1)'};animation:fadeUp .4s ease both;}
-.auth-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-.auth-h{font-family:'Playfair Display',serif;font-size:20px;font-weight:800;letter-spacing:-.4px;margin-bottom:3px;}
-.auth-sh{font-size:12px;color:var(--text2);margin-bottom:16px;}
-.field{margin-bottom:10px;}
+  mask-image:radial-gradient(ellipse 90% 80% at 50% 50%,black 30%,transparent 80%);}
+.auth-brand{flex:0 0 46%;display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(32px,5vw,72px) clamp(28px,4vw,64px);position:relative;z-index:1;
+  border-right:1px solid var(--bord2);}
+.auth-brand-logo{display:flex;align-items:center;gap:10px;margin-bottom:44px;}
+.auth-brand-tagline{font-family:'Playfair Display',serif;font-size:clamp(28px,3.2vw,42px);
+  font-weight:800;letter-spacing:-1.5px;line-height:1.08;margin-bottom:14px;color:var(--text);}
+.auth-brand-tagline span{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.auth-brand-sub{font-size:14px;color:var(--text2);line-height:1.75;margin-bottom:36px;max-width:340px;}
+.auth-brand-feats{display:flex;flex-direction:column;gap:14px;margin-bottom:36px;}
+.auth-brand-feat{display:flex;align-items:flex-start;gap:14px;}
+.auth-brand-feat-ico{width:36px;height:36px;border-radius:10px;background:var(--surf);
+  border:1px solid var(--bord2);display:flex;align-items:center;justify-content:center;
+  font-size:17px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.1);}
+.auth-brand-feat-text strong{display:block;font-size:12px;font-weight:700;color:var(--text);margin-bottom:1px;}
+.auth-brand-feat-text span{font-size:11px;color:var(--text2);line-height:1.5;}
+.auth-brand-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--bord2);border:1px solid var(--bord2);border-radius:12px;overflow:hidden;}
+.auth-brand-stat{background:var(--surf);padding:14px 12px;text-align:center;}
+.auth-brand-stat-n{font-family:'Playfair Display',serif;font-size:20px;font-weight:800;}
+.auth-brand-stat-l{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-top:2px;}
+.auth-form-panel{flex:1;display:flex;align-items:center;justify-content:center;
+  padding:clamp(24px,4vw,56px);position:relative;z-index:1;}
+.auth-card{width:100%;max-width:390px;animation:fadeUp .4s ease both;}
+.auth-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
+.auth-h{font-family:'Playfair Display',serif;font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:5px;}
+.auth-sh{font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.6;}
+.field{margin-bottom:14px;}
 .field label{display:block;font-size:10px;font-weight:700;color:var(--text2);
-  letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;}
-.field input{width:100%;padding:12px 13px;background:var(--surf2);border:1px solid var(--bord2);
-  border-radius:9px;color:var(--text);font-size:15px;outline:none;
-  transition:border-color .2s,box-shadow .2s;}
+  letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.field-wrap{position:relative;}
+.field-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  font-size:14px;color:var(--text3);pointer-events:none;line-height:1;}
+.field input{width:100%;padding:13px 13px 13px 38px;background:var(--surf2);
+  border:1.5px solid var(--bord2);border-radius:10px;color:var(--text);font-size:15px;
+  outline:none;transition:border-color .2s,box-shadow .2s;font-family:inherit;}
 .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow);}
 .field input::placeholder{color:var(--text3);}
-.auth-err{font-size:12px;color:var(--red);margin-top:8px;padding:9px 12px;
-  background:${d?'rgba(255,92,92,.08)':'rgba(220,38,38,.05)'};border-radius:7px;
-  border:1px solid ${d?'rgba(255,92,92,.2)':'rgba(220,38,38,.15)'};}
-.auth-note{font-size:11px;color:var(--text3);margin-top:10px;line-height:1.65;
-  padding:9px 12px;background:var(--surf2);border-radius:7px;border:1px solid var(--border);}
-.captcha-img{width:100%;border-radius:8px;margin-bottom:10px;}
-.btn-p{padding:12px 22px;background:var(--accent);border:none;border-radius:10px;color:#fff;
-  font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  box-shadow:0 0 20px rgba(79,141,255,.25);}
-.btn-p:hover{opacity:.88;box-shadow:0 0 30px rgba(79,141,255,.4);}
+.auth-err{font-size:12px;color:var(--red);margin-top:10px;padding:10px 13px;
+  background:${d?'rgba(255,92,92,.08)':'rgba(220,38,38,.05)'};border-radius:8px;
+  border:1px solid ${d?'rgba(255,92,92,.2)':'rgba(220,38,38,.15)'};display:flex;align-items:flex-start;gap:7px;}
+.auth-note{font-size:11px;color:var(--text3);margin-top:12px;line-height:1.65;
+  padding:10px 13px;background:var(--surf2);border-radius:8px;border:1px solid var(--bord2);
+  display:flex;align-items:flex-start;gap:7px;}
+.captcha-img{width:100%;border-radius:8px;margin-bottom:12px;border:1px solid var(--bord2);}
+.btn-p{padding:13px 22px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;
+  transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 0 24px ${d?'rgba(79,141,255,.3)':'rgba(37,99,235,.2)'};}
+.btn-p:hover{opacity:.88;box-shadow:0 0 36px ${d?'rgba(79,141,255,.45)':'rgba(37,99,235,.3)'};}
 .btn-p:active{transform:scale(.97);}
-.btn-p:disabled{opacity:.4;cursor:not-allowed;}
-.btn-g{padding:10px 16px;background:transparent;border:1px solid var(--bord2);
-  border-radius:9px;color:var(--text);font-size:13px;cursor:pointer;transition:all .15s;}
+.btn-p:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+.btn-g{padding:11px 16px;background:transparent;border:1.5px solid var(--bord2);
+  border-radius:10px;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
 .btn-g:hover{border-color:var(--accent);color:var(--accent);}
+@media(max-width:767px){
+  .auth-brand{display:none;}
+  .auth-form-panel{padding:24px 20px;}
+}
 
 /* PROGRESS STEPS */
 .prog-steps{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
@@ -1030,38 +1060,81 @@ export default function Dashboard({
     <>
       <style>{getDashCSS(dark)}</style>
       <div className="auth-wrap">
+        <div className="auth-orb1"/><div className="auth-orb2"/>
         <div className="auth-grid"/>
-        <div className="auth-card">
-          <div className="auth-top">
-            <div style={{display:'flex',alignItems:'center',gap:8}}>
-              <div className="lmark">C</div>
-              <span style={{fontFamily:'Playfair Display',fontSize:14,fontWeight:700}}>CampusHub</span>
-            </div>
-            <button className="ibt" onClick={()=>setDark(d=>!d)}>{dark?'☀':'☾'}</button>
+
+        {/* ── Brand panel (desktop only) ── */}
+        <div className="auth-brand">
+          <div className="auth-brand-logo">
+            <div className="lmark">C</div>
+            <span style={{fontFamily:'Playfair Display',fontSize:15,fontWeight:700}}>CampusHub</span>
           </div>
-          <div className="auth-h">Welcome back</div>
-          <div className="auth-sh">Sign in with your SRM academia credentials</div>
-          <form onSubmit={handleLogin}>
-            <div className="field"><label>SRM Email</label>
-              <input type="email" placeholder="ab1234@srmist.edu.in" value={email}
-                onChange={e=>setEmail(e.target.value)} autoComplete="email"/>
-            </div>
-            <div className="field"><label>Password</label>
-              <div style={{position:'relative'}}>
-                <input type={showPass?'text':'password'} placeholder="........" value={pass}
-                  onChange={e=>setPass(e.target.value)} autoComplete="current-password" style={{paddingRight:42}}/>
-                <button type="button" onClick={()=>setShowPass(s=>!s)} style={{
-                  position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',
-                  background:'none',border:'none',cursor:'pointer',color:'var(--text2)',fontSize:15,padding:0,lineHeight:1}}>
-                  {showPass?'🙈':'👁'}
-                </button>
+          <h2 className="auth-brand-tagline">Your SRM portal,<br/><span>actually fast.</span></h2>
+          <p className="auth-brand-sub">Attendance, marks, and timetable — all in one clean dashboard. No lag, no confusion, no refreshing ten times.</p>
+          <div className="auth-brand-feats">
+            {[
+              {i:'📊',t:'Live attendance %',d:'Per-subject breakdown with skip margins'},
+              {i:'📅',t:'Day-order timetable',d:"Today's classes with room numbers"},
+              {i:'📈',t:'Internal marks',d:'All cycle tests in one clean view'},
+            ].map(f=>(
+              <div key={f.t} className="auth-brand-feat">
+                <div className="auth-brand-feat-ico">{f.i}</div>
+                <div className="auth-brand-feat-text">
+                  <strong>{f.t}</strong>
+                  <span>{f.d}</span>
+                </div>
               </div>
+            ))}
+          </div>
+          <div className="auth-brand-stats">
+            <div className="auth-brand-stat"><div className="auth-brand-stat-n" style={{color:'var(--green)'}}>75%</div><div className="auth-brand-stat-l">Min Attend.</div></div>
+            <div className="auth-brand-stat"><div className="auth-brand-stat-n" style={{color:'var(--accent)'}}>5</div><div className="auth-brand-stat-l">Day Orders</div></div>
+            <div className="auth-brand-stat"><div className="auth-brand-stat-n" style={{color:'var(--accent2)'}}>Free</div><div className="auth-brand-stat-l">Always</div></div>
+          </div>
+        </div>
+
+        {/* ── Form panel ── */}
+        <div className="auth-form-panel">
+          <div className="auth-card">
+            <div className="auth-top">
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <div className="lmark">C</div>
+                <span style={{fontFamily:'Playfair Display',fontSize:14,fontWeight:700}}>CampusHub</span>
+              </div>
+              <button className="ibt" onClick={()=>setDark(d=>!d)}>{dark?'☀':'☾'}</button>
             </div>
-            <button className="btn-p" type="submit" style={{width:'100%',marginTop:8}}>→ Sign in</button>
-          </form>
-          {error&&<div className="auth-err">⚠ {error}</div>}
-          <div className="auth-note">Credentials are only used to log into academia.srmist.edu.in on your behalf and are never stored.</div>
-          <button className="btn-g" style={{width:'100%',marginTop:8,fontSize:13}} onClick={()=>setView('landing')}>← Back to home</button>
+            <div className="auth-h">Welcome back</div>
+            <div className="auth-sh">Sign in with your SRM academia credentials</div>
+            <form onSubmit={handleLogin}>
+              <div className="field">
+                <label>SRM Email</label>
+                <div className="field-wrap">
+                  <span className="field-icon">✉</span>
+                  <input type="email" placeholder="ab1234@srmist.edu.in" value={email}
+                    onChange={e=>setEmail(e.target.value)} autoComplete="email"/>
+                </div>
+              </div>
+              <div className="field">
+                <label>Password</label>
+                <div className="field-wrap">
+                  <span className="field-icon">🔑</span>
+                  <input type={showPass?'text':'password'} placeholder="Your password" value={pass}
+                    onChange={e=>setPass(e.target.value)} autoComplete="current-password" style={{paddingRight:44}}/>
+                  <button type="button" onClick={()=>setShowPass(s=>!s)} style={{
+                    position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',
+                    background:'none',border:'none',cursor:'pointer',color:'var(--text2)',fontSize:15,padding:0,lineHeight:1}}>
+                    {showPass?'🙈':'👁'}
+                  </button>
+                </div>
+              </div>
+              <button className="btn-p" type="submit" disabled={loading} style={{width:'100%',marginTop:6}}>
+                {loading?<><span className="btn-spinner"/>Signing in...</>:'Sign in →'}
+              </button>
+            </form>
+            {error&&<div className="auth-err"><span>⚠</span><span>{error}</span></div>}
+            <div className="auth-note"><span>🔒</span><span>Credentials are only used to log into academia.srmist.edu.in on your behalf and are never stored.</span></div>
+            <button className="btn-g" style={{width:'100%',marginTop:10,fontSize:13}} onClick={()=>setView('landing')}>← Back to home</button>
+          </div>
         </div>
       </div>
     </>
@@ -1072,28 +1145,37 @@ export default function Dashboard({
     <>
       <style>{getDashCSS(dark)}</style>
       <div className="auth-wrap">
+        <div className="auth-orb1"/><div className="auth-orb2"/>
         <div className="auth-grid"/>
-        <div className="auth-card">
-          <div className="auth-top">
-            <div style={{display:'flex',alignItems:'center',gap:8}}>
-              <div className="lmark">C</div>
-              <span style={{fontFamily:'Playfair Display',fontSize:14,fontWeight:700}}>CampusHub</span>
+        <div className="auth-form-panel">
+          <div className="auth-card">
+            <div className="auth-top">
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <div className="lmark">C</div>
+                <span style={{fontFamily:'Playfair Display',fontSize:14,fontWeight:700}}>CampusHub</span>
+              </div>
+              <button className="ibt" onClick={()=>setDark(d=>!d)}>{dark?'☀':'☾'}</button>
             </div>
-            <button className="ibt" onClick={()=>setDark(d=>!d)}>{dark?'☀':'☾'}</button>
+            <div className="auth-h">One more step</div>
+            <div className="auth-sh">Solve the CAPTCHA to continue logging in</div>
+            {capImg&&<img className="captcha-img" src={capImg} alt="captcha"/>}
+            <form onSubmit={handleCaptcha}>
+              <div className="field">
+                <label>CAPTCHA Text</label>
+                <div className="field-wrap">
+                  <span className="field-icon">🔤</span>
+                  <input type="text" placeholder="Enter the text from the image" value={capSol}
+                    onChange={e=>setCapSol(e.target.value)} autoFocus/>
+                </div>
+              </div>
+              <button className="btn-p" type="submit" disabled={loading} style={{width:'100%',marginTop:6}}>
+                {loading?<><span className="btn-spinner"/>Verifying...</>:'Verify →'}
+              </button>
+            </form>
+            {error&&<div className="auth-err"><span>⚠</span><span>{error}</span></div>}
+            <button className="btn-g" style={{width:'100%',marginTop:10,fontSize:13}}
+              onClick={()=>{setView('login');setError('');}}>← Back to login</button>
           </div>
-          <div className="auth-h">One more step</div>
-          <div className="auth-sh">Solve the CAPTCHA to continue</div>
-          {capImg&&<img className="captcha-img" src={capImg} alt="captcha"/>}
-          <form onSubmit={handleCaptcha}>
-            <div className="field"><label>CAPTCHA Text</label>
-              <input type="text" placeholder="Enter text from image" value={capSol}
-                onChange={e=>setCapSol(e.target.value)} autoFocus/>
-            </div>
-            <button className="btn-p" type="submit" style={{width:'100%',marginTop:8}}>→ Verify</button>
-          </form>
-          {error&&<div className="auth-err">⚠ {error}</div>}
-          <button className="btn-g" style={{width:'100%',marginTop:8,fontSize:13}}
-            onClick={()=>{setView('login');setError('');}}>← Back</button>
         </div>
       </div>
     </>
