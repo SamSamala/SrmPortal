@@ -663,7 +663,10 @@ export default function AdminPage() {
           <div className="stat-card" onClick={()=>setShowUsers(true)}>
             <div className="stat-lbl">Total Users</div>
             <div className="stat-val" style={{color:'#4f8dff'}}>{users?.count??'–'}</div>
-            <div className="stat-sub">click to view emails</div>
+            <div className="stat-sub">
+              {users?.activeCount!=null?<span style={{color:'#22d17a',fontWeight:700}}>{users.activeCount} active</span>:null}
+              {users?.activeCount!=null?' in last 24h · ':''}click to view
+            </div>
           </div>
           <div className="stat-card" style={{cursor:'default'}}>
             <div className="stat-lbl">Internship Listings</div>

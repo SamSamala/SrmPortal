@@ -11,8 +11,11 @@ export default async function handler(req, res) {
   }
 
   const emails = await redis.smembers('srm:users');
+  const since24h = Date.now() - 24 * 60 * 60 * 1000;
+  const activeCount = await redis.zcount('srm:users:active', since24h, '+inf');
   return res.status(200).json({
     count: emails.length,
+    activeCount: Number(activeCount),
     emails: emails.sort(),
   });
 }
